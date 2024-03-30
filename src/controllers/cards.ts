@@ -29,7 +29,12 @@ export const deleteCard = (req: IRequest, res: Response) => {
       if (!card) { return res.status(DATA_NOT_FOUND).send({ message: 'Карточка пользователя не найдена' }); }
       return res.send({ data: card });
     })
-    .catch((err) => res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при удалении карточки' });
+      }
+      return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
+    });
 };
 export const likeCard = (req: IRequest, res: Response) => {
   Card.findByIdAndUpdate(
@@ -42,7 +47,7 @@ export const likeCard = (req: IRequest, res: Response) => {
       return res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки лайка' });
       }
       return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
@@ -59,7 +64,7 @@ export const dislikeCard = (req: IRequest, res: Response) => {
       return res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для снятия лайка' });
       }
       return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });

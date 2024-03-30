@@ -24,7 +24,7 @@ export const getUsers = (req: IRequest, res: Response) => {
     .catch((err) => res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' }));
 };
 export const getUserById = (req: IRequest, res: Response) => {
-  User.findById(req.params.id)
+  User.findById(req.params.userId)
     .then((user) => {
       if (!user) { return res.status(DATA_NOT_FOUND).send({ message: 'Пользователь не найден' }); }
       return res.status(REQUEST_SUCCESS).send({ data: user });
@@ -41,7 +41,7 @@ export const updateUser = (req: IRequest, res: Response) => {
       return res.status(REQUEST_SUCCESS).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
       return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
