@@ -30,7 +30,10 @@ export const getUserById = (req: IRequest, res: Response) => {
       return res.status(REQUEST_SUCCESS).send({ data: user });
     })
     .catch((err) => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при удалении карточки' });
+      }
+      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 export const updateUser = (req: IRequest, res: Response) => {
