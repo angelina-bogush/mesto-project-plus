@@ -1,16 +1,15 @@
-import { Response } from 'express';
+import { NextFunction, Response } from 'express';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import { IRequest } from '../types';
 import { REQUEST_SUCCESS, VALIDATION_ERROR, DATA_NOT_FOUND, SERVER_ERROR } from '../constants';
 
-export const createUser = (req: IRequest, res: Response) => {
-  const { name, about, avatar } = req.body;
-  User.create({
-    name,
-    about,
-    avatar,
-  })
-    .then((user) => res.status(REQUEST_SUCCESS).send(user))
+export const createUser = (req: IRequest, res: Response, next: NextFunction) => {
+  const { name, about, avatar, email, password } = req.body;
+  return bcrypt.hash(password, 10)
+    .then((hash) => User.create({ name, about, avatar, email, password: hash }))
+    .then((user) => res.status(REQUEST_SUCCESS).send({ email: user.email, id: user._id }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при создании пользователя' });
@@ -64,3 +63,8 @@ export const updateAvatar = (req: IRequest, res: Response) => {
       return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
     });
 };
+export const login = async(req: IRequest, res: Response) => {
+  const { email, password } = req.body;
+ const user = await User.findUserByCredentials(email, password);
+ const token = jwt.sign({ _id: user._id }, 'secret_code', { expiresIn: '7d' });
+}

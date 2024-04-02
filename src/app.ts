@@ -1,5 +1,4 @@
-import express from 'express';
-import { Response } from 'express';
+import express, { Response } from 'express';
 import mongoose from 'mongoose';
 import { MONGO_URL, PORT } from './constants';
 import routes from './routes/index';
