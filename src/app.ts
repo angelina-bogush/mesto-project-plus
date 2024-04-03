@@ -2,7 +2,9 @@ import express, { Response } from 'express';
 import mongoose from 'mongoose';
 import { MONGO_URL, PORT } from './constants';
 import routes from './routes/index';
-import { IRequest } from './types';
+import { createUser, login } from './controllers/user';
+import auth from './middlewares/auth';
+import { validateLogin, validateCreateUser } from 'validator';
 
 const app = express();
 app.use(express.json());
@@ -16,12 +18,11 @@ mongoose
   .catch((error) => {
     console.error('Ошибка подключения к MongoDB:', error);
   });
-  app.use((req: IRequest, res: Response, next) => {
-    req.user = { _id: '6605bc78f87520d286264f51' };
-
-    next();
-  });
+app.post('/signin', validateLogin, login);
+app.post('/signup', validateCreateUser, createUser);
+app.use(auth)
 app.use(routes)
+
 
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`)

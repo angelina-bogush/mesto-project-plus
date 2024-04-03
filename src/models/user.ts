@@ -31,6 +31,13 @@ const userSchema = new Schema<IUser>({
   },
   avatar: {
     type: String,
+    validate: {
+      validator: (link: string) => {
+        /^(https?:\/\/)?([a-zA-Z0-9-._~:/?#[]@!$&'()*+,;=]+\.)*[a-zA-Z0-9-._~:/?#[]@!$&'()*+,;=]+#?$/.test(
+          link
+        );
+      },
+    },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
@@ -53,7 +60,7 @@ userSchema.static(
     email: string,
     password: string,
   ) {
-    return this.findOne({ email })
+    return this.findOne({ email }).select('+password')
       .then((user: IUser | null) => {
         if (!user) {
           return Promise.reject(new Error('Неправильная почта'));

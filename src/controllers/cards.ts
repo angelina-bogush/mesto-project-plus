@@ -1,9 +1,11 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import Card from '../models/cards';
 import { IRequest } from '../types';
-import { SERVER_ERROR, VALIDATION_ERROR, REQUEST_SUCCESS, DATA_NOT_FOUND } from '../constants';
+import {REQUEST_SUCCESS} from '../constants';
+import NotFoundError from 'errors/NotFoundError';
+import ValidationError from 'errors/ValidationError';
 
-export const createCard = (req: IRequest, res: Response) => {
+export const createCard = (req: IRequest, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
   Card.create({
     name,
@@ -13,60 +15,60 @@ export const createCard = (req: IRequest, res: Response) => {
     .then((card) => res.status(REQUEST_SUCCESS).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при создании карточки' });
+        return next(new ValidationError('Переданы некорректные данные при создании карточки'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
+      next();
     });
 };
-export const getCards = (req: IRequest, res: Response) => {
+export const getCards = (req: IRequest, res: Response, next: NextFunction) => {
   Card.find({})
     .then((cards) => res.status(REQUEST_SUCCESS).send({ data: cards }))
-    .catch((err) => res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' }));
+    .catch(next);
 };
-export const deleteCard = (req: IRequest, res: Response) => {
+export const deleteCard = (req: IRequest, res: Response, next: NextFunction) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
-      if (!card) { return res.status(DATA_NOT_FOUND).send({ message: 'Карточка пользователя не найдена' }); }
+      if (!card) { return next(new NotFoundError('Карточка пользователя не найдена')); }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при удалении карточки' });
+        return next(new ValidationError('Переданы некорректные данные при удалении карточки'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
+      next(err);
     });
 };
-export const likeCard = (req: IRequest, res: Response) => {
+export const likeCard = (req: IRequest, res: Response, next: NextFunction) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user?._id } },
     { new: true },
   )
     .then((card) => {
-      if (!card) { return res.status(DATA_NOT_FOUND).send({ message: 'Карточка пользователя не найдена' }); }
+      if (!card) { return next(new NotFoundError('Карточка пользователя не найдена')); }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки лайка' });
+        return next(new ValidationError('Переданы некорректные данные при постановке лайка'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
+      next();
     });
 };
-export const dislikeCard = (req: IRequest, res: Response) => {
+export const dislikeCard = (req: IRequest, res: Response, next: NextFunction) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user?._id } },
     { new: true },
   )
     .then((card) => {
-      if (!card) { return res.status(DATA_NOT_FOUND).send({ message: 'Карточка пользователя не найдена' }); }
+      if (!card) { return next(new NotFoundError('Карточка пользователя не найдена')); }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для снятия лайка' });
+        return next(new ValidationError('Переданы некорректные данные при постановке лайка'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка на сервере' });
+      next();
     });
 };
