@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import NotAuthError from "errors/NotAuthError";
+import { Request, Response, NextFunction } from 'express';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import NotAuthError from '../errors/NotAuthError';
+
 interface AuthRequest extends Request {
   user?: string | JwtPayload;
 }
@@ -15,10 +16,9 @@ const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    return next(new NotAuthError("Авторизуйтесь для выполнения"));
+    return next(new NotAuthError('Авторизуйтесь для выполнения запроса'));
   }
   req.user = payload;
-  next()
-}
+  next();
+};
 export default auth;
-

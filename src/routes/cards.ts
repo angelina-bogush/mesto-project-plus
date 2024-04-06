@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getCards, deleteCard, createCard, likeCard, dislikeCard } from '../controllers/cards';
-import { validateCardId, validateCreateCard } from 'validator';
+import { validateCardId, validateCreateCard } from '../validator/validator';
 
 const router = Router();
 router.get('/', getCards);

@@ -1,7 +1,6 @@
 import { model, Schema, Document, Model } from 'mongoose';
-import validator from 'validator';
 import bcrypt from 'bcrypt';
-
+import validator from 'validator';
 export interface IUser extends Document {
   name: string;
   about: string;
@@ -33,8 +32,8 @@ const userSchema = new Schema<IUser>({
     type: String,
     validate: {
       validator: (link: string) => {
-        /^(https?:\/\/)?([a-zA-Z0-9-._~:/?#[]@!$&'()*+,;=]+\.)*[a-zA-Z0-9-._~:/?#[]@!$&'()*+,;=]+#?$/.test(
-          link
+        /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(
+          link,
         );
       },
     },

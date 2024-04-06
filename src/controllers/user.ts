@@ -5,10 +5,10 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import { IRequest } from '../types';
 import { REQUEST_SUCCESS, VALIDATION_ERROR, DATA_NOT_FOUND, SERVER_ERROR } from '../constants';
-import ValidationError from 'errors/ValidationError';
-import NotFoundError from 'errors/NotFoundError';
-import { ForbiddenError } from 'errors/ForbiddenError';
-import NotAuthError from 'errors/NotAuthError';
+import ValidationError from '../errors/ValidationError';
+import NotFoundError from '../errors/NotFoundError';
+import { ForbiddenError } from '../errors/ForbiddenError';
+import NotAuthError from '../errors/NotAuthError';
 
 export const createUser = (req: IRequest, res: Response, next: NextFunction) => {
   const { name, about, avatar, email, password } = req.body;
@@ -22,7 +22,7 @@ export const createUser = (req: IRequest, res: Response, next: NextFunction) => 
       if (err.code === 11000) {
         return next(new ForbiddenError('Пользователь с таким email уже существует'))
       }
-      next(err)
+      next(err);
     });
 };
 

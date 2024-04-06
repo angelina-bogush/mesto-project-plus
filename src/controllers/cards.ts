@@ -1,9 +1,9 @@
 import { Response, NextFunction } from 'express';
 import Card from '../models/cards';
 import { IRequest } from '../types';
-import {REQUEST_SUCCESS} from '../constants';
-import NotFoundError from 'errors/NotFoundError';
-import ValidationError from 'errors/ValidationError';
+import { REQUEST_SUCCESS } from '../constants';
+import NotFoundError from '../errors/NotFoundError';
+import ValidationError from '../errors/ValidationError';
 
 export const createCard = (req: IRequest, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
