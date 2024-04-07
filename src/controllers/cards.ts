@@ -4,6 +4,7 @@ import { IRequest } from '../types';
 import { REQUEST_SUCCESS } from '../constants';
 import NotFoundError from '../errors/NotFoundError';
 import ValidationError from '../errors/ValidationError';
+import { ForbiddenError } from '../errors/ForbiddenError';
 
 export const createCard = (req: IRequest, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
@@ -25,11 +26,21 @@ export const getCards = (req: IRequest, res: Response, next: NextFunction) => {
     .then((cards) => res.status(REQUEST_SUCCESS).send({ data: cards }))
     .catch(next);
 };
+
 export const deleteCard = (req: IRequest, res: Response, next: NextFunction) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
-      if (!card) { return next(new NotFoundError('Карточка пользователя не найдена')); }
-      return res.send({ data: card });
+      if (!card) {
+        return next(new NotFoundError("Карточка не найдена."));
+      }
+      if (String(card.owner) !== req.user?._id) {
+        return next(
+          new ForbiddenError("Нет прав для удаления данной карточки")
+        );
+      }
+      card.remove()
+        .then(() => res.status(REQUEST_SUCCESS).send({ data: card }))
+        .catch((err) => next(err));
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
