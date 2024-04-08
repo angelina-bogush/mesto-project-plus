@@ -17,11 +17,15 @@ export const validateUpdateUser = celebrate({
     about: Joi.string().min(2).max(200).required(),
   }),
 });
-export const validateUpdateAvatar = celebrate({
-   body: Joi.object().keys({ avatar: Joi.string().pattern(avatar).required() }),
+export const validateUpdateAvatar = celebrate(
+  { body: Joi.object().keys({ avatar: Joi.string().pattern(avatar).required() }) },
+);
+export const validateUserId = celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().length(24).hex().required()
+      .required(),
+  }),
 });
-export const validateUserId = celebrate({ params:
-    Joi.object().keys({ userId: Joi.string().length(24).hex().required() }) });
 export const validateLogin = celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),

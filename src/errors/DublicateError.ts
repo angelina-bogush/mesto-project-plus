@@ -1,4 +1,5 @@
-import { DUBLICATE_ERROR } from "../constants";
+import { DUBLICATE_ERROR } from '../constants';
+
 export default class DublicateError extends Error {
   statusCode: number;
 

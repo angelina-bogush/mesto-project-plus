@@ -1,7 +1,8 @@
-import { model, Schema, Document, Model } from 'mongoose';
+import { model, Schema, Document, Model, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import NotAuthError from '../errors/NotAuthError';
+
 export interface IUser extends Document {
   name: string;
   about: string;
@@ -57,22 +58,19 @@ const userSchema = new Schema<IUser>({
 });
 userSchema.static(
   'findUserByCredentials',
-  function findUserByCredentials(
+  async function findUserByCredentials(
     email: string,
     password: string,
   ) {
-    return this.findOne({ email }).select('+password')
-      .then((user: IUser | null) => {
-        if (!user) {
-          return Promise.reject(new NotAuthError('Неправильная почта'));
-        }
-        return bcrypt.compare(password, user.password).then((matched) => {
-          if (!matched) {
-            return Promise.reject(new NotAuthError('Неправильный пароль'));
-          }
-          return user;
-        });
-      });
+    const user: (Document<unknown, any, IUser> & Omit<IUser & { _id: Types.ObjectId }, never>) | null = await this.findOne({ email }).select('+password');
+    if (!user) {
+      throw new NotAuthError('Неправильная почта');
+    }
+    const matched = await bcrypt.compare(password, user.password);
+    if (!matched) {
+      throw new NotAuthError('Неправильный пароль');
+    }
+    return user;
   },
 );
 export default model<IUser, UserModel>('user', userSchema);

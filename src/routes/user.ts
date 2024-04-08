@@ -4,8 +4,8 @@ import { validateUserId, validateUpdateUser, validateUpdateAvatar } from '../val
 
 const router = Router();
 router.get('', getUsers);
-router.get('/:userId', validateUserId, getUserById);
 router.get('/me', findUserInfo);
+router.get('/:userId', validateUserId, getUserById);
 router.patch('/me', validateUpdateUser, updateUser);
 router.patch('/me/avatar', validateUpdateAvatar, updateAvatar);
 

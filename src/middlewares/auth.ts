@@ -6,19 +6,18 @@ interface AuthRequest extends Request {
   user?: string | JwtPayload;
 }
 const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers;
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    return next(new NotAuthError('Необходима авторизация'));
-  }
-  const token = authorization.replace('Bearer ', '');
   let payload;
-
   try {
-    payload = jwt.verify(token, 'secret-key');
+    const tokenCookies = req.cookies.jwt;
+    if (!tokenCookies) {
+      return next(new NotAuthError('Необходима авторизация'));
+    }
+    const token = tokenCookies.replace('Bearer ', '');
+    payload = jwt.verify(token, 'secret_code');
   } catch (err) {
     return next(new NotAuthError('Авторизуйтесь для выполнения запроса'));
   }
   req.user = payload;
-  next();
+  return next();
 };
 export default auth;
